@@ -6,7 +6,7 @@
 
 # make worksheet.pdf S="The cat sat." or: make worksheet.pdf F=sentences.txt
 %.pdf:
-	uv run tracing.py -o $@ $(if $(F),-f $(F)) $(S)
+	uv run tracing.py -o $@ $(if $(F),-f $(F)) $(if $(S),"$$S")
 
 example:
 	uv run tracing.py -o example.pdf "In a hole in the ground there lived a hobbit."
