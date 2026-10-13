@@ -2,6 +2,7 @@
 
     uv run tracing.py -o out.pdf "The cat sat." "I like trains."
     uv run tracing.py -o out.pdf -f sentences.txt     # one sentence per line
+    uv run tracing.py -o out.pdf --header "Name: ________" --header "" --header "Week 1" "The cat sat."
 """
 import argparse
 from pathlib import Path
@@ -19,6 +20,7 @@ pdfmetrics.registerFont(TTFont("CursiveDashed", FONTS / "LearningCurveDashed.ttf
 PAGE_W, PAGE_H = letter
 MARGIN = 54            # 3/4 inch
 GUIDE = Color(0.6, 0.6, 0.6)
+HEADER = Color(0.35, 0.35, 0.35)
 # Learning Curve metrics (fraction of font size): ascender/caps 0.60, x-height 0.30, descender 0.24.
 ASCENT, DESCENT = 0.60, 0.24
 
@@ -48,8 +50,22 @@ def guide_row(c, y, row_h):
     c.line(MARGIN, y, PAGE_W - MARGIN, y)                   # baseline
 
 
-def build(sentences, out, blank_rows=0, solid=False, row_h=72):
+def page_header(c, header):
+    """Printout-style running header in the top margin: up to 3 values, left / center / right."""
+    if not header:
+        return
+    c.setFont("Helvetica", 9)
+    c.setFillColor(HEADER)
+    y = PAGE_H - 36
+    left, center, right = (list(header) + ["", "", ""])[:3]
+    c.drawString(MARGIN, y, left)
+    c.drawCentredString(PAGE_W / 2, y, center)
+    c.drawRightString(PAGE_W - MARGIN, y, right)
+
+
+def build(sentences, out, blank_rows=0, solid=False, row_h=0.7 * 72, header=()):
     c = canvas.Canvas(out, pagesize=letter)
+    page_header(c, header)
     font = "Cursive" if solid else "CursiveDashed"
     size = row_h / ASCENT                  # ascenders touch the top line, x-height the midline
     descent = size * DESCENT
@@ -63,6 +79,7 @@ def build(sentences, out, blank_rows=0, solid=False, row_h=72):
             rows = 1 + blank_rows
             if y - (rows - 1) * row_total - descent < MARGIN:
                 c.showPage()
+                page_header(c, header)
                 y = PAGE_H - MARGIN - row_h
             guide_row(c, y, row_h)
             c.setFont(font, size)
@@ -83,11 +100,15 @@ if __name__ == "__main__":
     p.add_argument("-o", "--out", default="worksheet.pdf")
     p.add_argument("-b", "--blank-rows", type=int, default=0, help="blank practice rows after each traced line (default 0)")
     p.add_argument("--solid", action="store_true", help="light grey solid letters instead of dashed")
-    p.add_argument("--row", type=float, default=1.0, help="writing row height in inches (default 1.0)")
+    p.add_argument("--row", type=float, default=0.7, help="writing row height in inches (default 0.7)")
+    p.add_argument("--header", action="append", default=[], metavar="TEXT",
+                   help="page header text; repeat up to 3 times for left / center / right")
     a = p.parse_args()
     sentences = a.sentences + (a.file.read_text().splitlines() if a.file else [])
     sentences = [s for s in sentences if s.strip()]
     if not sentences:
         p.error("give sentences as arguments or with -f")
-    build(sentences, a.out, a.blank_rows, a.solid, a.row * 72)
+    if len(a.header) > 3:
+        p.error("--header can be given at most 3 times (left / center / right)")
+    build(sentences, a.out, a.blank_rows, a.solid, a.row * 72, a.header)
     print(a.out)
