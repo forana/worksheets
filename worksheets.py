@@ -7,7 +7,8 @@
       "defaults": {"header": ["Name: ________", "", "Week 1"]},
       "worksheets": [
         {"type": "tracing", "sentences": ["The cat sat.", "I like trains."]},
-        {"type": "tracing", "sentences": ["Bonus round!"], "solid": true, "blank_rows": 1}
+        {"type": "tracing", "sentences": ["Bonus round!"], "solid": true, "blank_rows": 1},
+        {"type": "math", "title": "Times Tables", "categories": ["single-mult"], "count": 12}
       ]
     }
 
@@ -21,10 +22,11 @@ from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
+import arithmetic
 import tracing
 
 # type name -> render(c, **options); options are the function's keyword parameters
-TYPES = {"tracing": tracing.render}
+TYPES = {"tracing": tracing.render, "math": arithmetic.render}
 
 
 def options(render):

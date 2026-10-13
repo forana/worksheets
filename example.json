@@ -11,6 +11,11 @@
       "type": "tracing",
       "sentences": ["The cat sat on the mat.", "I like trains."],
       "blank_rows": 1
+    },
+    {
+      "type": "math",
+      "title": "Adding & Subtracting",
+      "categories": ["single-add", "single-sub-single"]
     }
   ]
 }

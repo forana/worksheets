@@ -13,14 +13,13 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
+from page import MARGIN, PAGE_H, PAGE_W, page_header
+
 FONTS = Path(__file__).parent / "fonts"
 pdfmetrics.registerFont(TTFont("Cursive", FONTS / "LearningCurve.ttf"))
 pdfmetrics.registerFont(TTFont("CursiveDashed", FONTS / "LearningCurveDashed.ttf"))
 
-PAGE_W, PAGE_H = letter
-MARGIN = 54            # 3/4 inch
 GUIDE = Color(0.6, 0.6, 0.6)
-HEADER = Color(0.35, 0.35, 0.35)
 # Learning Curve metrics (fraction of font size): ascender/caps 0.60, x-height 0.30, descender 0.24.
 ASCENT, DESCENT = 0.60, 0.24
 
@@ -37,6 +36,13 @@ def wrap(text, font, size, width):
     return lines + [line] if line else lines
 
 
+def spacing(row_h):
+    """(descent, gap, pitch) for writing rows of height row_h; pitch is baseline to baseline."""
+    descent = row_h / ASCENT * DESCENT     # room for cursive descenders below the baseline
+    gap = row_h / 6                        # 3 trace+practice pairs fit a Letter page at 1in rows
+    return descent, gap, row_h + descent + gap
+
+
 def guide_row(c, y, row_h):
     """Three handwriting lines; y is the baseline."""
     c.setStrokeColor(GUIDE)
@@ -50,23 +56,6 @@ def guide_row(c, y, row_h):
     c.line(MARGIN, y, PAGE_W - MARGIN, y)                   # baseline
 
 
-def page_header(c, header):
-    """Printout-style running header in the top margin: up to 3 values, left / center / right."""
-    if isinstance(header, str):
-        header = [header]
-    if len(header) > 3:
-        raise ValueError("header takes at most 3 values (left / center / right)")
-    if not header:
-        return
-    c.setFont("Helvetica", 9)
-    c.setFillColor(HEADER)
-    y = PAGE_H - 36
-    left, center, right = (list(header) + ["", "", ""])[:3]
-    c.drawString(MARGIN, y, left)
-    c.drawCentredString(PAGE_W / 2, y, center)
-    c.drawRightString(PAGE_W - MARGIN, y, right)
-
-
 def render(c, sentences, blank_rows=0, solid=False, row=0.7, header=()):
     """Draw a tracing worksheet onto canvas c from a fresh page; ends with a page break."""
     if isinstance(sentences, str):
@@ -76,10 +65,8 @@ def render(c, sentences, blank_rows=0, solid=False, row=0.7, header=()):
     row_h = row * 72
     font = "Cursive" if solid else "CursiveDashed"
     size = row_h / ASCENT                  # ascenders touch the top line, x-height the midline
-    descent = size * DESCENT
-    gap = row_h / 6                        # 3 trace+practice pairs fit a Letter page at 1in rows
+    descent, gap, row_total = spacing(row_h)
     width = PAGE_W - 2 * MARGIN - 24       # 12pt padding each side
-    row_total = row_h + descent + gap
     y = PAGE_H - MARGIN - row_h
 
     for sentence in sentences:

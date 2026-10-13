@@ -12,11 +12,13 @@ build({
     "worksheets": [
         {"type": "tracing", "sentences": ["The cat sat."]},
         {"type": "tracing", "sentences": ["I like trains."], "solid": True, "header": "Bonus"},
+        {"type": "math", "categories": ["single-add"], "count": 4, "title": "Sums"},
     ],
 }, out)
 pdf = out.read_bytes()
-assert re.search(rb"/Count 2\b", pdf), "each worksheet starts its own page"
-assert pdf.count(b"(Week 1) Tj") == 1
+assert re.search(rb"/Count 3\b", pdf), "each worksheet starts its own page"
+assert pdf.count(b"(Week 1) Tj") == 2, "defaults reach every type"
+assert pdf.count(b"(Sums) Tj") == 1
 assert pdf.count(b"(Bonus) Tj") == 1, "worksheet header overrides defaults"
 
 for bad, msg in [
@@ -29,6 +31,8 @@ for bad, msg in [
     ({"worksheet": []}, "worksheets"),
     ({"defaults": [], "worksheets": [{"type": "tracing", "sentences": ["x"]}]}, "defaults"),
     ({"worksheets": ["The cat sat."]}, "object"),
+    ({"worksheets": [{"type": "math", "categories": ["x"], "solid": True}]}, "solid"),
+    ({"worksheets": [{"type": "math"}]}, "missing"),
 ]:
     try:
         load(bad)
