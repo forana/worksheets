@@ -52,6 +52,10 @@ def guide_row(c, y, row_h):
 
 def page_header(c, header):
     """Printout-style running header in the top margin: up to 3 values, left / center / right."""
+    if isinstance(header, str):
+        header = [header]
+    if len(header) > 3:
+        raise ValueError("header takes at most 3 values (left / center / right)")
     if not header:
         return
     c.setFont("Helvetica", 9)
@@ -63,9 +67,13 @@ def page_header(c, header):
     c.drawRightString(PAGE_W - MARGIN, y, right)
 
 
-def build(sentences, out, blank_rows=0, solid=False, row_h=0.7 * 72, header=()):
-    c = canvas.Canvas(out, pagesize=letter)
+def render(c, sentences, blank_rows=0, solid=False, row=0.7, header=()):
+    """Draw a tracing worksheet onto canvas c from a fresh page; ends with a page break."""
+    if isinstance(sentences, str):
+        sentences = [sentences]
+    sentences = [s for s in sentences if s.strip()]
     page_header(c, header)
+    row_h = row * 72
     font = "Cursive" if solid else "CursiveDashed"
     size = row_h / ASCENT                  # ascenders touch the top line, x-height the midline
     descent = size * DESCENT
@@ -90,6 +98,12 @@ def build(sentences, out, blank_rows=0, solid=False, row_h=0.7 * 72, header=()):
                 guide_row(c, y, row_h)
                 y -= row_total
         y -= gap   # extra breathing room between sentences
+    c.showPage()
+
+
+def build(sentences, out, **opts):
+    c = canvas.Canvas(str(out), pagesize=letter)
+    render(c, sentences, **opts)
     c.save()
 
 
@@ -110,5 +124,5 @@ if __name__ == "__main__":
         p.error("give sentences as arguments or with -f")
     if len(a.header) > 3:
         p.error("--header can be given at most 3 times (left / center / right)")
-    build(sentences, a.out, a.blank_rows, a.solid, a.row * 72, a.header)
+    build(sentences, a.out, blank_rows=a.blank_rows, solid=a.solid, row=a.row, header=a.header)
     print(a.out)

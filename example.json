@@ -1,0 +1,16 @@
+{
+  "defaults": {
+    "header": ["Name: ________________", "Cursive Practice", "Date: __________"]
+  },
+  "worksheets": [
+    {
+      "type": "tracing",
+      "sentences": ["In a hole in the ground there lived a hobbit."]
+    },
+    {
+      "type": "tracing",
+      "sentences": ["The cat sat on the mat.", "I like trains."],
+      "blank_rows": 1
+    }
+  ]
+}
