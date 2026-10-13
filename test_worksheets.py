@@ -13,11 +13,12 @@ build({
         {"type": "tracing", "sentences": ["The cat sat."]},
         {"type": "tracing", "sentences": ["I like trains."], "solid": True, "header": "Bonus"},
         {"type": "math", "categories": ["single-add"], "count": 4, "title": "Sums"},
+        {"type": "patterns", "count": 3},
     ],
 }, out)
 pdf = out.read_bytes()
-assert re.search(rb"/Count 3\b", pdf), "each worksheet starts its own page"
-assert pdf.count(b"(Week 1) Tj") == 2, "defaults reach every type"
+assert re.search(rb"/Count 4\b", pdf), "each worksheet starts its own page"
+assert pdf.count(b"(Week 1) Tj") == 3, "defaults reach every type"
 assert pdf.count(b"(Sums) Tj") == 1
 assert pdf.count(b"(Bonus) Tj") == 1, "worksheet header overrides defaults"
 

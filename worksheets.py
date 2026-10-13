@@ -23,10 +23,11 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
 import arithmetic
+import patterns
 import tracing
 
 # type name -> render(c, **options); options are the function's keyword parameters
-TYPES = {"tracing": tracing.render, "math": arithmetic.render}
+TYPES = {"tracing": tracing.render, "math": arithmetic.render, "patterns": patterns.render}
 
 
 def options(render):

@@ -1,6 +1,6 @@
 # worksheets
 
-Printable worksheet generator: cursive letter-tracing and arithmetic. Letter-size PDF.
+Printable worksheet generator: cursive letter-tracing, arithmetic and number patterns. Letter-size PDF.
 
 ```sh
 uv run tracing.py -o week1.pdf "The cat sat on the mat." "I like trains."
@@ -32,6 +32,23 @@ uv run arithmetic.py -o math.pdf single-add single-sub-single -n 20 --seed 7
 
 Options: `-n/--count` problems (default: one full page), `--title`, `--seed N` for a reproducible sheet (otherwise every run is different), `--row`, `--header` as above.
 
+## Number patterns
+
+One random pattern per line: the first 5 numbers shown, 3 blanks to fill in.
+
+```sh
+uv run patterns.py -o patterns.pdf --title "What Comes Next?"
+```
+
+Each line is one of (X, Y random 1–10; starting from a random single digit unless noted):
+
+- add X each step
+- subtract X each step, starting from a two-digit number high enough to never go negative
+- alternately add X, then Y (X ≠ Y)
+- Fibonacci — always 1, 1, 2, 3, 5, 8 (one extra number shown), then 3 blanks; at most once per sheet
+
+Options: `-n/--count` patterns (default: one full page), `--title`, `--seed`, `--row`, `--header`, as for math.
+
 ## Worksheet sets
 
 Build several worksheets into one PDF (each starts on a new page) from a JSON file — see [example.json](example.json):
@@ -56,6 +73,7 @@ Each worksheet has a `type` plus that type's options, which mirror the CLIs:
 
 - `tracing`: `sentences`, `blank_rows`, `solid`, `row` (inches), `header` (a string or up to 3 strings for left / center / right)
 - `math`: `categories`, `count`, `title`, `seed`, `row`, `header`
+- `patterns`: `count`, `title`, `seed`, `row`, `header`
 
 `defaults` apply to every worksheet that accepts them; a worksheet's own keys override them. Unknown keys are errors, so typos don't silently do nothing.
 

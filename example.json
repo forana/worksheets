@@ -16,6 +16,10 @@
       "type": "math",
       "title": "Adding & Subtracting",
       "categories": ["single-add", "single-sub-single"]
+    },
+    {
+      "type": "patterns",
+      "title": "What Comes Next?"
     }
   ]
 }

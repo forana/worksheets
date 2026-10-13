@@ -13,10 +13,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
-from page import MARGIN, PAGE_H, PAGE_W, page_header
-from tracing import spacing
+from page import MARGIN, PAGE_W, SANS, sans_layout, start_page
 
-FONT, TITLE_FONT = "Helvetica", "Helvetica-Bold"
 PLUS, MINUS, TIMES, DIVIDE = "+", "–", "×", "÷"   # en dash reads as a minus sign in Helvetica
 COL_GAP = 36           # between the two columns
 
@@ -86,30 +84,21 @@ def render(c, categories, count=None, seed=None, title=None, row=0.7, header=())
     if count is not None and (not isinstance(count, int) or count < 1):
         raise ValueError(f"count must be a positive integer, got {count!r}")
 
-    row_h = row * 72
-    descent, gap, pitch = spacing(row_h)     # same rows as the cursive sheets
-    size = row_h * 0.7                       # digits reach about the cursive midline
-    title_size = row_h / 2
-    top = PAGE_H - MARGIN - (title_size + gap if title else 0)
-    rows = 1 + int((top - row_h - descent - MARGIN) // pitch)
+    row_h, size, top, pitch, rows = sans_layout(row, title)
     count = count or 2 * rows
     problems = [f"{a} {op} {b} =" for a, op, b in generate(categories, count, random.Random(seed))]
 
     col_w = (PAGE_W - 2 * MARGIN - COL_GAP) / 2
-    expr_w = max(stringWidth(p, FONT, size) for p in problems)   # line up the = signs
+    expr_w = max(stringWidth(p, SANS, size) for p in problems)   # line up the = signs
     for i, problem in enumerate(problems):
         r, col = divmod(i % (2 * rows), 2)
         if i and r == col == 0:
             c.showPage()
         if r == col == 0:
-            page_header(c, header)
-            if title:
-                c.setFont(TITLE_FONT, title_size)
-                c.setFillColor(black)
-                c.drawCentredString(PAGE_W / 2, PAGE_H - MARGIN - title_size * 0.75, title)
+            start_page(c, header, title, row_h)
         x = MARGIN + col * (col_w + COL_GAP)
         y = top - row_h - r * pitch
-        c.setFont(FONT, size)
+        c.setFont(SANS, size)
         c.setFillColor(black)
         c.drawRightString(x + expr_w, y, problem)
         c.setStrokeColor(black)

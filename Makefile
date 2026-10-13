@@ -14,6 +14,7 @@ example:
 test:
 	uv run test_tracing.py
 	uv run test_arithmetic.py
+	uv run test_patterns.py
 	uv run test_worksheets.py
 
 clean:

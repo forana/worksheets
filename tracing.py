@@ -13,15 +13,13 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-from page import MARGIN, PAGE_H, PAGE_W, page_header
+from page import ASCENT, MARGIN, PAGE_H, PAGE_W, page_header, spacing
 
 FONTS = Path(__file__).parent / "fonts"
 pdfmetrics.registerFont(TTFont("Cursive", FONTS / "LearningCurve.ttf"))
 pdfmetrics.registerFont(TTFont("CursiveDashed", FONTS / "LearningCurveDashed.ttf"))
 
 GUIDE = Color(0.6, 0.6, 0.6)
-# Learning Curve metrics (fraction of font size): ascender/caps 0.60, x-height 0.30, descender 0.24.
-ASCENT, DESCENT = 0.60, 0.24
 
 
 def wrap(text, font, size, width):
@@ -34,13 +32,6 @@ def wrap(text, font, size, width):
             lines.append(line)
             line = word
     return lines + [line] if line else lines
-
-
-def spacing(row_h):
-    """(descent, gap, pitch) for writing rows of height row_h; pitch is baseline to baseline."""
-    descent = row_h / ASCENT * DESCENT     # room for cursive descenders below the baseline
-    gap = row_h / 6                        # 3 trace+practice pairs fit a Letter page at 1in rows
-    return descent, gap, row_h + descent + gap
 
 
 def guide_row(c, y, row_h):
